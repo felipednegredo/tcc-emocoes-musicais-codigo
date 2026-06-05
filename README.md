@@ -1,47 +1,30 @@
 # TCC: Reconhecimento de Emoções Musicais via Fingerprinting Espectral
 
-Este projeto faz parte de um Trabalho de Conclusão de Curso (TCC) focado na análise e reconhecimento de emoções em músicas através de técnicas de processamento digital de sinais e aprendizado de máquina. O objetivo central é transformar clipes de áudio em representações compactas e robustas ("fingerprints") que preservem as características emocionais para treinamento de modelos de I.A.
+Este repositório contém notebooks e experimentos relacionados à extração de assinaturas espectrais (fingerprints) e ao reconhecimento de emoções musicais.
 
 ---
 
-## 🚀 Visão Geral do Pipeline
+## TCC II
 
-O fluxo de dados do projeto é dividido em três etapas principais, automatizadas via notebooks Python:
+Fase de desenvolvimento do pipeline básico: processamento espectral e geração de fingerprints.
 
-### 1. Processamento STFT (`TCC_STFT.ipynb`)
-- **Entrada**: Arquivos de áudio brutos (Dataset DEAM).
-- **Processamento**: 
-    - Aplicação da Transformada de Fourier de Curto Termo (STFT).
-    - Divisão da música em blocos temporais.
-    - Sincronização com metadados de Valence/Arousal (VA).
-- **Saída**: Arquivos Parquet compactados contendo as magnitudes espectrais, frequências e tempos de cada bloco.
+- `TCC_STFT.ipynb`: processamento inicial com STFT, divisão em blocos e exportação para Parquet.
+- `TCC_Fingerprint.ipynb`: detecção de picos, construção de constelações e geração de hashes (abordagem tipo Shazam).
 
-### 2. Fingerprinting e Hashing (`TCC_Fingerprint.ipynb`)
-- **Detecção de Picos**: Identificação dos pontos de maior energia no espectrograma (picos espectrais) usando filtros de densidade adaptativos.
-- **Constelação**: Criação de um mapa de picos para cada bloco da música.
-- **Geração de Hashes (Shazam-like)**:
-    - Seleção de pontos de ancoragem e zonas de destino.
-    - Criação de hashes estáveis baseados na relação temporal e de frequência entre picos.
-    - Quantização para garantir robustez contra ruídos e distorções.
-- **Visualização**: Geração de gráficos interativos (Plotly) comparando o espectrograma com o mapa de picos.
-
-### 3. Preparação para I.A (`ai_ready/`)
-- **Consolidação**: Os fingerprints são salvos em formato Parquet otimizado para consumo direto por modelos de Deep Learning.
-- **Rótulos Emocionais**: Cada conjunto de hashes é acompanhado por seus valores de Valência e Arousal, permitindo o treinamento supervisionado em modelos de regressão ou classificação por quadrantes emocionais (Modelo de Russell).
+Os notebooks acima geram artefatos em `ai_ready/` para uso em treinamentos de modelos.
 
 ---
 
-## 📁 Estrutura de Arquivos
+## TCC III
 
-```text
-tcc-emocoes-musicais-codigo/
-├── TCC_STFT.ipynb         # Pipeline inicial de processamento de áudio
-├── TCC_Fingerprint.ipynb    # Algoritmo de geração de fingerprints e hashes
-├── README.md                # Documentação do projeto
-└── .git/                    # Controle de versão
-```
+Fase de experimentação e avaliação dos modelos (classificação binária, multiclasse e regressão), além de técnicas avançadas de fingerprint.
 
-*Nota: Os dados processados (Parquets e HTMLs) são geralmente armazenados em diretórios externos (como Google Drive) devido ao grande volume.*
+- `TCC III/Binária/`: experimentos de classificação binária.
+- `TCC III/Multiclasse/`: experimentos de classificação multiclasse.
+- `TCC III/Regressão/`: experimentos de regressão sobre Valence/Arousal.
+- `TCC III/Técnicas_Fingerprint/`: notebooks adicionais sobre variações e análise de banda (`TCC_Fingerprint_Band_Rank.ipynb`, `TCC_Fingerprint_Rank.ipynb`).
+
+*Obs.: as pastas do TCC III organizam os diferentes protocolos de avaliação e as variantes do modelo.*
 
 ---
 
