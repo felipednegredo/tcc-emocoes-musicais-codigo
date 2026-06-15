@@ -69,7 +69,7 @@ A resposta encontrada no TCC é **parcialmente sim**: os fingerprints isolados n
 | Baseline | `openSMILE` |
 | Proposta | fingerprints acústicos extraídos de picos espectrais via STFT |
 | Representações | `Rank`, `Band Rank`, `Raw Peaks` |
-| Tarefas | regressão, classificação multiclasse e One-vs-Rest |
+| Tarefas avaliadas no TCC | regressão, classificação multiclasse e One-vs-Rest |
 | Validação | `GroupKFold(5)` agrupado por `song_id` |
 | Métricas principais | RMSE, MAE, R², Macro-F1, F1 positivo e acurácia balanceada |
 
@@ -94,7 +94,7 @@ A principal conclusão experimental é que os fingerprints têm maior utilidade 
 
 ## Organização do repositório
 
-A estrutura atual preserva o histórico do desenvolvimento do TCC: primeiro a construção do pipeline de STFT e fingerprinting no **TCC II**, depois a fase de modelagem, validação e análise no **TCC III**.
+A estrutura abaixo mostra os **notebooks reais versionados no repositório**. Ela preserva o histórico do desenvolvimento do TCC: primeiro a construção do pipeline de STFT e fingerprinting no **TCC II**, depois a preparação do baseline, a geração das features finais e as análises interpretativas no **TCC III**.
 
 ```text
 .
@@ -105,18 +105,14 @@ A estrutura atual preserva o histórico do desenvolvimento do TCC: primeiro a co
 │   └── TCC_Fingerprint.ipynb
 │
 └── TCC III/
+    ├── 00_construir_opensmile_blocks.ipynb
+    │
     ├── Técnicas_Fingerprint/
     │   ├── TCC_Fingerprint_Rank.ipynb
     │   └── TCC_Fingerprint_Band_Rank.ipynb
     │
-    ├── Regressão/
-    │   └── notebooks de regressão contínua para valence e arousal
-    │
-    ├── Multiclasse/
-    │   └── notebooks de classificação direta dos quadrantes emocionais
-    │
-    └── Binária/
-        └── notebooks One-vs-Rest por quadrante emocional
+    └── Analises/
+        └── Analise_Pandas_Fingerprint_Panda_Taxonomia.ipynb
 ```
 
 ### Leitura rápida por finalidade
@@ -124,25 +120,24 @@ A estrutura atual preserva o histórico do desenvolvimento do TCC: primeiro a co
 | Caminho | Papel no projeto | Quando usar |
 |---|---|---|
 | `README.md` | documentação geral do projeto | primeiro contato com o repositório |
-| `TCC II/TCC_STFT.ipynb` | exploração inicial da STFT e blocos de áudio | entender a base tempo–frequência |
-| `TCC II/TCC_Fingerprint.ipynb` | protótipo inicial de constelações e hashes | entender a origem da abordagem de fingerprinting |
-| `TCC III/Técnicas_Fingerprint/` | geração final das features de fingerprinting | reproduzir `Rank`, `Band Rank` e `Raw Peaks` |
-| `TCC III/Regressão/` | modelos contínuos de `valence` e `arousal` | avaliar RMSE, MAE e R² |
-| `TCC III/Multiclasse/` | classificação direta em quadrantes emocionais | avaliar Macro-F1 e matrizes de confusão |
-| `TCC III/Binária/` | classificadores One-vs-Rest | analisar desempenho por quadrante |
+| `TCC II/TCC_STFT.ipynb` | exploração inicial da STFT, blocos temporais e estrutura dos dados | entender a base tempo–frequência do projeto |
+| `TCC II/TCC_Fingerprint.ipynb` | protótipo inicial de constelações, picos espectrais e hashes | entender a origem da abordagem de fingerprinting |
+| `TCC III/00_construir_opensmile_blocks.ipynb` | construção dos blocos e artefatos relacionados ao baseline `openSMILE` | preparar a comparação com descritores acústicos tradicionais |
+| `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Rank.ipynb` | geração da representação `Rank` por picos espectrais globais | produzir `fingerprint_rank.parquet` |
+| `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | geração da representação `Band Rank` e dos picos brutos por banda | produzir `fingerprint_band_rank.parquet` e `fingerprint_band_rank_raw_peaks.parquet` |
+| `TCC III/Analises/Analise_Pandas_Fingerprint_Panda_Taxonomia.ipynb` | análise interpretativa das features de fingerprinting pela taxonomia de Panda et al. | explicar a cobertura conceitual das features e a diferença entre `arousal` e `valence` |
 
 ### Organização por etapa experimental
 
-| Etapa | Entrada | Processamento | Saída |
+| Etapa | Notebook / artefato relacionado | Processamento | Saída esperada |
 |---|---|---|---|
-| 1. Preparação | áudios e anotações DEAM | alinhamento temporal e segmentação | blocos por música |
-| 2. STFT | blocos de áudio | decomposição tempo–frequência | espectrogramas / matrizes espectrais |
-| 3. Fingerprint Rank | espectro por bloco | ranqueamento dos principais picos globais | `fingerprint_rank.parquet` |
-| 4. Fingerprint Band Rank | espectro por bloco | extração de picos por banda | `fingerprint_band_rank.parquet` |
-| 5. Raw Peaks | picos espectrais por banda | preservação granular dos eventos | `fingerprint_band_rank_raw_peaks.parquet` |
-| 6. Modelagem | features + rótulos | regressão, multiclasse e One-vs-Rest | métricas e gráficos |
-| 7. Fusão | `openSMILE` + fingerprints | avaliação combinada | resultados de complementaridade |
-| 8. Interpretação | rankings, ANOVA, Pearson e taxonomia de Panda et al. | análise estatística e conceitual | tabelas e figuras do TCC |
+| 1. Exploração tempo–frequência | `TCC II/TCC_STFT.ipynb` | STFT, blocos e inspeção do sinal | blocos e visualizações iniciais |
+| 2. Protótipo de fingerprinting | `TCC II/TCC_Fingerprint.ipynb` | constelações, picos e hashes | protótipos e artefatos iniciais |
+| 3. Baseline acústico | `TCC III/00_construir_opensmile_blocks.ipynb` | preparação dos blocos `openSMILE` | artefatos de baseline por bloco |
+| 4. Fingerprint Rank | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Rank.ipynb` | ranqueamento dos principais picos globais | `fingerprint_rank.parquet` |
+| 5. Fingerprint Band Rank | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | extração de picos por banda de frequência | `fingerprint_band_rank.parquet` |
+| 6. Raw Peaks | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | preservação granular dos picos por banda | `fingerprint_band_rank_raw_peaks.parquet` |
+| 7. Análise conceitual | `TCC III/Analises/Analise_Pandas_Fingerprint_Panda_Taxonomia.ipynb` | mapeamento das features na taxonomia de Panda et al. | tabelas e gráficos interpretativos |
 
 ---
 
@@ -156,6 +151,12 @@ Dados/
 ├── valence.csv                    # anotações temporais de valence
 ├── arousal.csv                    # anotações temporais de arousal
 │
+├── opensmile/
+│   ├── opensmile_blocks.parquet
+│   ├── opensmile_blocks_inventory.csv
+│   ├── opensmile_taxonomy_features.csv
+│   └── opensmile_taxonomy_summary.csv
+│
 ├── fingerprint_rank/
 │   └── fingerprint_rank.parquet
 │
@@ -163,9 +164,6 @@ Dados/
 │   ├── fingerprint_band_rank.parquet
 │   ├── fingerprint_band_rank_raw_peaks.parquet
 │   └── songs/                     # saídas opcionais por música
-│
-├── opensmile/
-│   └── features openSMILE usadas como baseline
 │
 └── resultados/
     ├── tabelas/
@@ -186,20 +184,14 @@ Essa separação mantém o repositório leve e evita versionar arquivos derivado
 | `TCC II/TCC_STFT.ipynb` | processar áudio, explorar STFT e preparar blocos temporais |
 | `TCC II/TCC_Fingerprint.ipynb` | gerar mapas de constelação, picos espectrais e hashes inspirados em fingerprinting acústico |
 
-### TCC III — geração de features
+### TCC III
 
-| Notebook | Objetivo | Saída principal |
+| Notebook | Objetivo | Saída / contribuição principal |
 |---|---|---|
+| `TCC III/00_construir_opensmile_blocks.ipynb` | construir a base por blocos com descritores `openSMILE` | baseline acústico e inventários de features |
 | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Rank.ipynb` | extrair picos globais por bloco e gerar ranking espectral | `fingerprint_rank.parquet` |
-| `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | extrair picos por banda de frequência | `fingerprint_band_rank.parquet` e `fingerprint_band_rank_raw_peaks.parquet` |
-
-### TCC III — modelagem
-
-| Pasta | Objetivo |
-|---|---|
-| `TCC III/Regressão/` | regressão contínua de `valence` e `arousal` |
-| `TCC III/Multiclasse/` | classificação direta dos quadrantes emocionais Q1–Q4 |
-| `TCC III/Binária/` | classificação binária One-vs-Rest para cada quadrante |
+| `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | extrair picos por banda de frequência e picos brutos | `fingerprint_band_rank.parquet` e `fingerprint_band_rank_raw_peaks.parquet` |
+| `TCC III/Analises/Analise_Pandas_Fingerprint_Panda_Taxonomia.ipynb` | analisar a cobertura das features de fingerprinting segundo Panda et al. | gráficos e tabelas interpretativas para o TCC |
 
 ---
 
@@ -218,18 +210,18 @@ Extração de picos espectrais
    ↓
 Geração das representações Rank, Band Rank e Raw Peaks
    ↓
+Preparação do baseline openSMILE por bloco
+   ↓
 Limpeza de atributos e remoção de colunas de vazamento
    ↓
 Validação agrupada por song_id
    ↓
-Modelagem supervisionada
+Modelagem supervisionada avaliada no TCC
    ├── regressão contínua de valence/arousal
    ├── classificação multiclasse por quadrantes
    └── classificação binária One-vs-Rest
    ↓
-Comparação com openSMILE
-   ↓
-Fusão openSMILE + fingerprints
+Comparação entre openSMILE, fingerprints e fusão
    ↓
 Análise estatística e interpretação conceitual
 ```
@@ -376,11 +368,10 @@ Para o Google Colab, monte o Google Drive e ajuste o `ROOT` para a pasta corresp
 |---|---|---|
 | 1 | `TCC II/TCC_STFT.ipynb` | exploração e preparação inicial |
 | 2 | `TCC II/TCC_Fingerprint.ipynb` | protótipo de fingerprinting |
-| 3 | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Rank.ipynb` | gerar `fingerprint_rank.parquet` |
-| 4 | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | gerar `fingerprint_band_rank.parquet` e `raw_peaks` |
-| 5 | `TCC III/Regressão/` | avaliar regressão VA |
-| 6 | `TCC III/Multiclasse/` | avaliar quadrantes Q1–Q4 |
-| 7 | `TCC III/Binária/` | avaliar One-vs-Rest por quadrante |
+| 3 | `TCC III/00_construir_opensmile_blocks.ipynb` | preparar os blocos e inventários do baseline `openSMILE` |
+| 4 | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Rank.ipynb` | gerar `fingerprint_rank.parquet` |
+| 5 | `TCC III/Técnicas_Fingerprint/TCC_Fingerprint_Band_Rank.ipynb` | gerar `fingerprint_band_rank.parquet` e `raw_peaks` |
+| 6 | `TCC III/Analises/Analise_Pandas_Fingerprint_Panda_Taxonomia.ipynb` | gerar análises interpretativas pela taxonomia de Panda et al. |
 
 ---
 
@@ -388,6 +379,10 @@ Para o Google Colab, monte o Google Drive e ajuste o `ROOT` para a pasta corresp
 
 | Artefato | Descrição | Versionar? |
 |---|---|---|
+| `opensmile_blocks.parquet` | blocos com descritores acústicos `openSMILE` usados como baseline | não |
+| `opensmile_blocks_inventory.csv` | inventário das features `openSMILE` | opcional, se pequeno |
+| `opensmile_taxonomy_features.csv` | mapeamento das features `openSMILE` em categorias conceituais | opcional, se pequeno |
+| `opensmile_taxonomy_summary.csv` | resumo da taxonomia `openSMILE` | opcional, se pequeno |
 | `fingerprint_rank.parquet` | atributos consolidados da representação Rank por bloco | não |
 | `fingerprint_band_rank.parquet` | atributos por banda de frequência agregados por bloco | não |
 | `fingerprint_band_rank_raw_peaks.parquet` | picos brutos por banda | não |
@@ -435,49 +430,7 @@ Possíveis extensões:
 - testar modelos temporais que preservem sequência entre blocos;
 - comparar fingerprints com embeddings modernos de áudio;
 - avaliar novas estratégias de fusão;
-- validar o pipeline em outras bases de MER, como EmoMusic, PMEmo ou MER500;
-- refatorar os notebooks para um pacote Python em `src/`, facilitando reprodução e manutenção.
-
----
-
-## Estrutura recomendada para refatoração futura
-
-A estrutura atual preserva o histórico do TCC. Para uma versão mais limpa e reprodutível, uma organização futura poderia ser:
-
-```text
-tcc-emocoes-musicais-codigo/
-├── README.md
-├── requirements.txt
-├── .gitignore
-│
-├── notebooks/
-│   ├── 01_preprocessamento_stft/
-│   ├── 02_fingerprints/
-│   ├── 03_modelagem_regressao/
-│   ├── 04_modelagem_multiclasse/
-│   ├── 05_modelagem_ovr/
-│   └── 06_analises_interpretativas/
-│
-├── src/
-│   └── mer_fingerprint/
-│       ├── config.py
-│       ├── audio.py
-│       ├── features.py
-│       ├── validation.py
-│       ├── modeling.py
-│       └── plots.py
-│
-├── data/
-│   ├── raw/              # não versionar
-│   ├── interim/          # não versionar
-│   └── processed/        # não versionar
-│
-├── reports/
-│   ├── figures/
-│   └── tables/
-│
-└── models/               # não versionar
-```
+- validar o pipeline em outras bases de MER, como EmoMusic, PMEmo ou MER500.
 
 ---
 
