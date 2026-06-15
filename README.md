@@ -63,40 +63,148 @@ A leitura crítica do trabalho é que os fingerprints capturam bem padrões loca
 
 ## Organização do repositório
 
+A organização do repositório acompanha a evolução do TCC: primeiro a construção do pipeline de STFT e fingerprinting no **TCC II**, depois a fase de experimentação, modelagem, comparação com `openSMILE` e fusão no **TCC III**.
+
 ```text
 .
 ├── README.md
+│
 ├── TCC II/
 │   ├── TCC_STFT.ipynb
 │   └── TCC_Fingerprint.ipynb
+│
 └── TCC III/
-    ├── Binária/
-    ├── Multiclasse/
+    ├── Técnicas_Fingerprint/
+    │   ├── TCC_Fingerprint_Rank.ipynb
+    │   └── TCC_Fingerprint_Band_Rank.ipynb
+    │
     ├── Regressão/
-    └── Técnicas_Fingerprint/
-        ├── TCC_Fingerprint_Rank.ipynb
-        └── TCC_Fingerprint_Band_Rank.ipynb
+    │   └── notebooks de regressão contínua para valence e arousal
+    │
+    ├── Multiclasse/
+    │   └── notebooks de classificação dos quadrantes emocionais
+    │
+    └── Binária/
+        └── notebooks One-vs-Rest por quadrante emocional
 ```
 
-### TCC II
+### Leitura rápida por finalidade
 
-Fase inicial do projeto, com notebooks voltados à construção do pipeline base:
+| Parte do repositório | Papel no projeto | Quando usar |
+|---|---|---|
+| `README.md` | documentação geral do projeto, metodologia, execução e artefatos | ponto de entrada do repositório |
+| `TCC II/TCC_STFT.ipynb` | experimentos iniciais de STFT, segmentação e análise tempo–frequência | entender a base do processamento espectral |
+| `TCC II/TCC_Fingerprint.ipynb` | protótipo inicial de fingerprinting espectral, constelação de picos e hashes | entender a origem da proposta de fingerprinting |
+| `TCC III/Técnicas_Fingerprint/` | geração final das features `Rank`, `Band Rank` e picos brutos | reproduzir as representações usadas no TCC final |
+| `TCC III/Regressão/` | avaliação contínua de `valence` e `arousal` | comparar RMSE, MAE e R² entre cenários |
+| `TCC III/Multiclasse/` | classificação direta dos quadrantes emocionais | avaliar Macro-F1, acurácia balanceada e matrizes de confusão |
+| `TCC III/Binária/` | detectores `One-vs-Rest` por quadrante | analisar desempenho por classe emocional |
 
-| Notebook | Função |
-|---|---|
-| `TCC_STFT.ipynb` | processamento inicial do áudio, segmentação e exportação de blocos |
-| `TCC_Fingerprint.ipynb` | geração de espectrogramas, mapas de constelação, picos espectrais e hashes inspirados em fingerprinting acústico |
+### Organização por etapa experimental
 
-### TCC III
+| Etapa | Entrada principal | Processamento | Saída esperada |
+|---|---|---|---|
+| 1. Preparação | áudios e anotações DEAM | segmentação temporal e alinhamento V/A | blocos por música |
+| 2. STFT | blocos de áudio | decomposição tempo–frequência | espectrogramas e matrizes espectrais |
+| 3. Fingerprint Rank | espectro por bloco | seleção dos principais picos globais | `fingerprint_rank.parquet` |
+| 4. Fingerprint Band Rank | espectro por bloco | seleção de picos por banda de frequência | `fingerprint_band_rank.parquet` |
+| 5. Raw Peaks | picos por banda | preservação granular dos eventos espectrais | `fingerprint_band_rank_raw_peaks.parquet` |
+| 6. Modelagem | features + rótulos emocionais | regressão, multiclasse e One-vs-Rest | tabelas de métricas e figuras |
+| 7. Fusão | `openSMILE` + fingerprints | comparação entre cenários combinados | resultados de complementaridade |
+| 8. Interpretação | rankings, ANOVA, Pearson e Panda et al. | análise estatística e conceitual | tabelas e gráficos interpretativos |
 
-Fase final de experimentação, validação e análise dos resultados:
+### Papel das pastas do TCC III
 
-| Pasta | Função |
-|---|---|
-| `TCC III/Regressão/` | experimentos de regressão para `valence` e `arousal` |
-| `TCC III/Multiclasse/` | classificação direta dos quadrantes emocionais |
-| `TCC III/Binária/` | classificadores binários `One-vs-Rest` por quadrante |
-| `TCC III/Técnicas_Fingerprint/` | geração e análise das representações de fingerprinting |
+A pasta `TCC III/` representa a fase final do trabalho e concentra os notebooks que sustentam os resultados apresentados no relatório.
+
+```text
+TCC III/
+├── Técnicas_Fingerprint/   # geração das features de fingerprinting
+├── Regressão/              # modelos contínuos para valence/arousal
+├── Multiclasse/            # classificação direta dos quadrantes Q1–Q4
+└── Binária/                # classificadores One-vs-Rest para cada quadrante
+```
+
+A separação por tarefa evita misturar geração de atributos com avaliação supervisionada. Assim, os notebooks de `Técnicas_Fingerprint/` produzem os artefatos de entrada, enquanto as pastas `Regressão/`, `Multiclasse/` e `Binária/` consomem esses artefatos para treinamento, validação e análise.
+
+### Artefatos locais esperados
+
+Os dados originais e artefatos pesados devem ficar fora do GitHub, em uma pasta local de trabalho. Um exemplo de organização local compatível com os notebooks é:
+
+```text
+Dados/
+├── audio/                         # áudios da base DEAM
+├── valence.csv                    # anotações temporais de valence
+├── arousal.csv                    # anotações temporais de arousal
+│
+├── fingerprint_rank/
+│   └── fingerprint_rank.parquet
+│
+├── fingerprint_band_rank/
+│   ├── fingerprint_band_rank.parquet
+│   ├── fingerprint_band_rank_raw_peaks.parquet
+│   └── songs/                     # saídas opcionais por música
+│
+├── opensmile/
+│   └── blocos/features openSMILE usadas como baseline
+│
+└── resultados/
+    ├── tabelas/
+    ├── figuras/
+    └── modelos/
+```
+
+Essa separação mantém o repositório leve e preserva no GitHub apenas código, notebooks e documentação. Arquivos derivados da DEAM, Parquets grandes, modelos treinados e imagens exportadas devem ser mantidos localmente ou em armazenamento externo.
+
+### Estrutura recomendada para uma refatoração futura
+
+A estrutura atual preserva o histórico do TCC. Caso o projeto seja transformado em um pacote mais limpo e reprodutível, uma organização futura recomendada seria:
+
+```text
+tcc-emocoes-musicais-codigo/
+├── README.md
+├── requirements.txt
+├── .gitignore
+│
+├── notebooks/
+│   ├── 01_preprocessamento_stft/
+│   ├── 02_fingerprints/
+│   ├── 03_modelagem_regressao/
+│   ├── 04_modelagem_multiclasse/
+│   ├── 05_modelagem_ovr/
+│   └── 06_analises_interpretativas/
+│
+├── src/
+│   └── mer_fingerprint/
+│       ├── config.py
+│       ├── audio.py
+│       ├── features.py
+│       ├── validation.py
+│       ├── modeling.py
+│       └── plots.py
+│
+├── data/
+│   ├── raw/              # não versionar
+│   ├── interim/          # não versionar
+│   └── processed/        # não versionar
+│
+├── reports/
+│   ├── figures/
+│   └── tables/
+│
+└── models/               # não versionar
+```
+
+Essa refatoração não é necessária para compreender o TCC, mas facilitaria reprodução, manutenção e reaproveitamento do código em trabalhos futuros.
+
+### Convenções importantes
+
+- Pastas com acentos e espaços foram mantidas por fidelidade ao histórico do trabalho.
+- Os notebooks são a fonte principal de reprodução experimental.
+- Os dados da DEAM não são distribuídos neste repositório.
+- Artefatos pesados devem ser ignorados pelo Git e documentados no README.
+- Toda validação supervisionada deve respeitar o agrupamento por `song_id`.
+- Colunas de rótulo emocional devem ser removidas da matriz `X` antes do treinamento.
 
 ---
 
